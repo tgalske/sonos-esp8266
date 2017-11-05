@@ -9,8 +9,10 @@ const char* state =  strcat(node_ip, ":5005/state");
 const char* pause = strcat(node_ip, ":5005/pauseall");
 const char* play = strcat(node_ip, ":5005/resumeall")
 
-int buttonInput = D0;
-boolean isPressed = false;
+const char* pauseButton = "D0";
+boolean isPausePressed = false;
+const char* playButton = "D1";
+boolean isPlayPressed = false; 
 
 void setup () {
 
@@ -29,9 +31,9 @@ void setup () {
 
 void loop() {
 	
-	isPressed = digitalRead(buttonInput);
+	isPausePressed = digitalRead(pauseButton);
 	
-	if (isPressed) {
+	if (isPausedPressed) {
 		if (WiFi.status() == WL_CONNECTED) {
 			HTTPClient http;
 						
