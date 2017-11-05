@@ -9,10 +9,8 @@ const char* state =  strcat(node_ip, ":5005/state");
 const char* pause = strcat(node_ip, ":5005/pauseall");
 const char* play = strcat(node_ip, ":5005/resumeall")
 
-const char* pauseButton = "D0";
-boolean isPausePressed = false;
-const char* playButton = "D1";
-boolean isPlayPressed = false; 
+const char* buttonInput = "D0";
+boolean isPressed = false;
 
 void setup () {
 
@@ -31,36 +29,24 @@ void setup () {
 
 void loop() {
 	
-	isPausePressed = digitalRead(pauseButton);
+	isPressed = digitalRead(buttonInput);
 	
 	if (isPausedPressed) {
 		if (WiFi.status() == WL_CONNECTED) {
 			HTTPClient http;
 						
-			http.begin(state);
+			
+			
+			/* TO DO:
+			1) Make HTTP request to get state of Sonos speakers
+			2) Extract JSON key:value for standby state (playing/pause?)
+			
+			*/
+			http.begin(state); // Get state of Sonos speakers
+			
 			int httpCode = http.GET();
 			if (httpCode == 200) {
 				Serial.println("Success");
-			}
-			http.end();
-		}
-	}
-	
-    if (buttonState == HIGH) {
-        digitalWrite(lightOutput, LOW);
-    } else {
-        digitalWrite(lightOutput, HIGH);
-    }
-	
-	
-	
-		if (WiFi.status() == WL_CONNECTED) {
-			HTTPClient http;
-						
-			http.begin(state);
-			int httpCode = http.GET();
-			if (httpCode == 200) {
-				Serial.println("Success.");
 			}
 			http.end();
 		}
