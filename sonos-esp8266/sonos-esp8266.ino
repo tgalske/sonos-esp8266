@@ -2,82 +2,71 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
-#include <ArduinoJson.h>
-
-#define USE_SERIAL Serial
-
 
 ESP8266WiFiMulti WiFiMulti;
 
+const char* ssid = "Airwave-A2_1-axz1xs1w7";
+char* node_server_ip = "http://172.16.51.214";
+
+char* volumeup = "http://172.16.51.214:5005/groupVolume/+3";
+char* volumedown = "http://172.16.51.214:5005/groupVolume/-3";
+char* playpause = "http://172.16.51.214:5005/alpha/playpause";
+
+int volumeupState, volumedownState, playpauseState = 0;
+
 void setup() {
 
-    USE_SERIAL.begin(115200);
-   // USE_SERIAL.setDebugOutput(true);
+  Serial.begin(115200);
+  // Serial.setDebugOutput(true);
 
-    USE_SERIAL.println();
-    USE_SERIAL.println();
-    USE_SERIAL.println();
+  pinMode(D0, INPUT); // volume up
+  pinMode(D3, INPUT); // volume down
+  pinMode(D4, INPUT); // playpause
 
-    for(uint8_t t = 4; t > 0; t--) {
-        USE_SERIAL.printf("[SETUP] WAIT %d...\n", t);
-        USE_SERIAL.flush();
-        delay(1000);
-    }
-    WiFiMulti.addAP("Airwave-A2_1-axz1xs1w7");
+  Serial.println();
+
+  for (uint8_t t = 4; t > 0; t--) {
+    Serial.printf("[SETUP] WAIT %d...\n", t);
+    Serial.flush();
+    delay(1000);
+  }
+  WiFiMulti.addAP(ssid);
 }
 
 void loop() {
-    char json[] = " {\"SensorType\": \"Temperature\", \"Value\": 10}";
-    // wait for WiFi connection
-    if((WiFiMulti.run() == WL_CONNECTED)) {
+  volumeupState = digitalRead(D0);
+  volumedownState = digitalRead(D3);
+  playpauseState = digitalRead(D4);
 
-        HTTPClient http;
+  if (volumeupState == LOW) {
+    makeRequest(volumeup);
+    delay(200);
+  }
 
-        USE_SERIAL.print("[HTTP] begin...\n");
-        http.begin("http://172.16.51.214:5005/state"); //HTTP
+  if (volumedownState == LOW) {
+    makeRequest(volumedown);
+    delay(200);
+  }
+  
+  if (playpauseState == LOW) {
+    makeRequest(playpause);
+    delay(200);
+  }
+  
+}
 
-        USE_SERIAL.print("[HTTP] GET...\n");
-        // start connection and send HTTP header
-        int httpCode = http.GET();
-
-        // httpCode will be negative on error
-        if(httpCode > 0) {
-            // HTTP header has been send and Server response header has been handled
-            USE_SERIAL.printf("[HTTP] GET... code: %d\n", httpCode);
-
-            // file found at server
-            if(httpCode == HTTP_CODE_OK) {
-				String payload = http.getString();
-				USE_SERIAL.println(payload);
-				
-				
-				int payload_len = payload.length() + 1; 
- 
-				char char_array[payload_len];
-
-				payload.toCharArray(char_array, payload_len);
-				
-				StaticJsonBuffer<1000> JSONBuffer;   //Memory pool
-				JsonObject& parsed = JSONBuffer.parseObject(char_array);
-				
-				if (!parsed.success()) {   //Check for errors in parsing
-					Serial.println("Parsing failed");
-				}
-				
-				const char * state = parsed["playbackState"];
-				Serial.println(state);
-                
-            }
-        } else {
-            USE_SERIAL.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-        }
-
-        http.end();
+void makeRequest(char* command) {
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+    HTTPClient http;
+    http.begin(command);
+    int httpCode = http.GET();
+    if (httpCode != 200) {
+      Serial.printf("HTTP GET error: %s\n", http.errorToString(httpCode).c_str());
+    } else {
+      Serial.println(http.getString());
+      Serial.println(command);
     }
-
-
-    
-
-    delay(10000);
+    http.end();
+  }
 }
 
