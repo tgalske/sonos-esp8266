@@ -5,23 +5,23 @@
 
 ESP8266WiFiMulti WiFiMulti;
 
-const char* ssid = "Airwave-A2_1-axz1xs1w7";
-char* node_server_ip = "http://172.16.51.214";
+const char* ssid = "********";
+const char* password = "********";
 
-char* volumeup = "http://172.16.51.214:5005/groupVolume/+3";
-char* volumedown = "http://172.16.51.214:5005/groupVolume/-3";
-char* playpause = "http://172.16.51.214:5005/alpha/playpause";
+char* button1 = "http://xxx.xxx.xxx.xxx:5005/";
+char* button2 = "http://xxx.xxx.xxx.xxx:5005/";
+char* button3 = "http://xxx.xxx.xxx.xxx:5005/";
 
-int volumeupState, volumedownState, playpauseState = 0;
+int button1State, button2state, button3State = 0;
 
 void setup() {
 
   Serial.begin(115200);
   // Serial.setDebugOutput(true);
 
-  pinMode(D0, INPUT); // volume up
-  pinMode(D3, INPUT); // volume down
-  pinMode(D4, INPUT); // playpause
+  pinMode(D0, INPUT); // button 1
+  pinMode(D3, INPUT); // button 2
+  pinMode(D4, INPUT); // button 3
 
   Serial.println();
 
@@ -30,26 +30,29 @@ void setup() {
     Serial.flush();
     delay(1000);
   }
-  WiFiMulti.addAP(ssid);
+  WiFiMulti.addAP(ssid, password);
+  
+  // If there is no password:
+  // WiFiMulti.addAP(ssid);
 }
 
 void loop() {
-  volumeupState = digitalRead(D0);
-  volumedownState = digitalRead(D3);
-  playpauseState = digitalRead(D4);
+  button1State = digitalRead(D0);
+  button2state = digitalRead(D3);
+  button3State = digitalRead(D4);
 
-  if (volumeupState == LOW) {
-    makeRequest(volumeup);
+  if (button1State == LOW) {
+    makeRequest(button1);
     delay(200);
   }
 
-  if (volumedownState == LOW) {
-    makeRequest(volumedown);
+  if (button2state == LOW) {
+    makeRequest(button2);
     delay(200);
   }
   
-  if (playpauseState == LOW) {
-    makeRequest(playpause);
+  if (button3State == LOW) {
+    makeRequest(button3);
     delay(200);
   }
   
